@@ -1,0 +1,19 @@
+# Makefile.am
+
+
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+SUBDIRS = src
+DIST_SUBDIRS = src
+EXTRA_DIST = \
+	autogen.sh \
+	README
+
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
+
+#install-data-local:
+#	$(MKDIR_P) $(DESTDIR)$(LXCPATH)
+#	$(MKDIR_P) $(DESTDIR)$(localstatedir)/cache/lxc
+
+ChangeLog::
+	@touch ChangeLog
