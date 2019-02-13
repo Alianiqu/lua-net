@@ -22,8 +22,8 @@ libcore_la_LDFLAGS = \
 # libcore_la_LIBADD =
 
 install-exec-local: install-libLTLIBRARIES
-	mkdir -p $(DESTDIR)$(lualibdir)/lxc/
-	mv $(DESTDIR)$(libdir)/libcore.so.0.0.0 $(DESTDIR)$(lualibdir)/lxc/core.so
+	mkdir -p $(DESTDIR)$(lualibdir)/net/
+	mv $(DESTDIR)$(libdir)/libcore.so.0.0.0 $(DESTDIR)$(lualibdir)/net/core.so
 	rm $(DESTDIR)$(libdir)/libcore.*
 
 uninstall-local:
