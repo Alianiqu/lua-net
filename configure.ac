@@ -5,6 +5,12 @@ AC_PREREQ([2.69])
 AC_INIT([lua-net], [0.0.1], [no@whe.re])
 AC_CONFIG_SRCDIR([src/core.c])
 AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE([-Wall -Werror -Wno-portability subdir-objects])
+
+
+# libtool
+LT_INIT
+AC_SUBST([LIBTOOL_DEPS])
 
 # Checks for programs.
 AC_PROG_CC
