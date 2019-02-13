@@ -31,6 +31,42 @@ AC_CHECK_HEADERS([arpa/inet.h stdlib.h string.h sys/ioctl.h unistd.h])
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([socket strerror])
 
+# Lua module and scripts
+AC_ARG_WITH([lua-pc],
+	[AS_HELP_STRING(
+		[--with-lua-pc=PKG],
+		[Specify pkg-config package name for lua]
+	)], [], [with_lua_pc=no])
+
+if test "x$with_lua_pc" != "xno"; then
+	# exit with error if not found
+	PKG_CHECK_MODULES([LUA], [$with_lua_pc], [LUAPKGCONFIG=$with_lua_pc])
+fi
+
+if "x$with_lua_pc" != "xno"; then
+	PKG_CHECK_MODULES([LUA], [$with_lua_pc],
+		[LUAPKGCONFIG=$with_lua_pc
+		enable_lua=yes],
+		[enable_lua=no])
+fi
+
+PKG_CHECK_MODULES([LUA], [lua], [LUAPKGCONFIG=lua],
+	[PKG_CHECK_MODULES([LUA], [lua5.2], [LUAPKGCONFIG=lua5.2],
+		[PKG_CHECK_MODULES([LUA], [lua5.1], [LUAPKGCONFIG=lua5.1],
+			[AS_IF([test "x$enable_lua" = "xyes"],
+				[AC_MSG_ERROR([Lua not found. Please use --with-lua-pc=PKG])],
+				[enable_lua=no])]
+		)]
+	)])
+
+AC_MSG_CHECKING([Lua version])
+PKG_CHECK_VAR([LUA_VERSION], [$LUAPKGCONFIG], [V],,
+	[PKG_CHECK_VAR([LUA_VERSION], [$LUAPKGCONFIG], [major_version])])
+AC_MSG_RESULT([$LUA_VERSION])
+AC_SUBST([LUA_LIBDIR], [$libdir/lua/$LUA_VERSION])
+AC_SUBST([LUA_SHAREDIR], [$datadir/lua/$LUA_VERSION])
+
+
 AC_CONFIG_FILES([
     Makefile
     src/Makefile

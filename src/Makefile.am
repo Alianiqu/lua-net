@@ -10,7 +10,7 @@ libcore_la_SOURCES = core.c
 
 AM_LDFLAGS = -Wl,-E
 
-AM_CFLAGS=-I$(top_builddir)/src -I$(top_srcdir)/src $(LUA_CFLAGS) -DVERSION=\"$(VERSION)\" -DLXCPATH=\"$(LXCPATH)\"
+AM_CFLAGS=-I$(top_builddir)/src -I$(top_srcdir)/src $(LUA_CFLAGS) -DVERSION=\"$(VERSION)\"
 
 libcore_la_CFLAGS = -fPIC -DPIC $(AM_CFLAGS)
 
