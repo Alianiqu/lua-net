@@ -126,6 +126,30 @@ const static int _setroute(const char * dst, const char * mask,
   return 0;
 }
 
+const static int _ifup(const char * ifname) {
+  int r;
+  struct ifreq ifr;
+  const int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (fd < 0) {
+    fprintf(stderr, "Create socket failed for ifup");
+    return 1;
+  }
+  memset(&ifr, 0, sizeof(ifr));
+  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+
+  if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
+    fprintf(stderr, "_ifup get flags SIOCGIFFLAGS failed");
+    return 1;
+  }
+  ifr.ifr_flags |= (IFF_UP | IFF_RUNNING);
+
+  if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
+    fprintf(stderr, "_ifup set flags SIOCSIFFLAGS failed");
+    return 1;
+  }
+  return 0;
+}
+
 // Method implementation
 const static int net_setip(lua_State * L) {
 
@@ -206,10 +230,34 @@ const static int net_setroute(lua_State * L) {
   return 0;
 }
 
+const static int net_ifup(lua_State * L) {
+  int code;
+  const int argc = lua_gettop(L);
+  printf("argc %d", argc);
+
+  if (argc < 1) {
+    fprintf(stderr, "you must pass one argument: ifname");
+    goto exit;
+  }
+
+  if (lua_isstring(L, 1) != 1) {
+    fprintf(stderr, "ifname is string");
+    goto exit;
+  }
+
+  const char * ifname = strdupa(luaL_checkstring(L, 1));
+  printf("ifup %s", ifname);
+  code = _ifup(ifname);
+
+ exit:
+  return code;
+}
+
 // Register library using this array
 static const struct luaL_Reg NetLib[] = {
     {"setip", net_setip},
     {"setroute", net_setroute},
+    {"ifup", net_ifup},
     {NULL, NULL}
 };
 
