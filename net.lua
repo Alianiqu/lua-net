@@ -13,7 +13,8 @@ local net = require("net.core")
 local M = {
   setip = net.setip,
   setroute = net.setroute,
-  ifup = net.ifup
+  ifup = net.ifup,
+  ifdown = net.ifdown
 }
 
 return M

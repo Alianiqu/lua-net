@@ -126,25 +126,32 @@ const static int _setroute(const char * dst, const char * mask,
   return 0;
 }
 
-const static int _ifup(const char * ifname) {
+const static int _ifup(const char * ifname, int state) {
   int r;
   struct ifreq ifr;
   const int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
   if (fd < 0) {
-    fprintf(stderr, "Create socket failed for ifup");
+    fprintf(stderr, "Create socket failed for ifup\n");
     return 1;
   }
   memset(&ifr, 0, sizeof(ifr));
   strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
 
   if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
-    fprintf(stderr, "_ifup get flags SIOCGIFFLAGS failed");
+    fprintf(stderr, "_ifup get flags SIOCGIFFLAGS failed\n");
     return 1;
   }
-  ifr.ifr_flags |= (IFF_UP | IFF_RUNNING);
+  if( state == 0 )
+  {
+    ifr.ifr_flags = ifr.ifr_flags & ~(IFF_UP | IFF_RUNNING);
+  }
+  else
+  {
+    ifr.ifr_flags |= (IFF_UP | IFF_RUNNING);
+  }
 
   if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
-    fprintf(stderr, "_ifup set flags SIOCSIFFLAGS failed");
+    fprintf(stderr, "_ifup set flags SIOCSIFFLAGS failed\n");
     return 1;
   }
   return 0;
@@ -236,18 +243,41 @@ const static int net_ifup(lua_State * L) {
   printf("argc %d", argc);
 
   if (argc < 1) {
-    fprintf(stderr, "you must pass one argument: ifname");
+    fprintf(stderr, "you must pass one argument: ifname\n");
     goto exit;
   }
 
   if (lua_isstring(L, 1) != 1) {
-    fprintf(stderr, "ifname is string");
+    fprintf(stderr, "ifname is string\n");
     goto exit;
   }
 
   const char * ifname = strdupa(luaL_checkstring(L, 1));
-  printf("ifup %s", ifname);
-  code = _ifup(ifname);
+  printf("ifup %s\n", ifname);
+  code = _ifup(ifname,1);
+
+ exit:
+  return code;
+}
+
+const static int net_ifdown(lua_State * L) {
+  int code;
+  const int argc = lua_gettop(L);
+  printf("argc %d", argc);
+
+  if (argc < 1) {
+    fprintf(stderr, "you must pass one argument: ifname\n");
+    goto exit;
+  }
+
+  if (lua_isstring(L, 1) != 1) {
+    fprintf(stderr, "ifname is string\n");
+    goto exit;
+  }
+
+  const char * ifname = strdupa(luaL_checkstring(L, 1));
+  printf("ifdown %s\n", ifname);
+  code = _ifup(ifname,0);
 
  exit:
   return code;
@@ -258,6 +288,7 @@ static const struct luaL_Reg NetLib[] = {
     {"setip", net_setip},
     {"setroute", net_setroute},
     {"ifup", net_ifup},
+    {"ifdown", net_ifdown},
     {NULL, NULL}
 };
 
